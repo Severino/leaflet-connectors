@@ -1,0 +1,27 @@
+{
+  "name": "leaflet-connectors",
+  "version": "1.0.0",
+  "description": "",
+  "main": "src/main.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Severino/leaflet-connectors.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Severino/leaflet-connectors/issues"
+  },
+  "homepage": "https://github.com/Severino/leaflet-connectors#readme",
+  "dependencies": {
+    "leaflet": "^1.9.4"
+  },
+  "devDependencies": {
+    "leaflet-svg-shape-markers": "^1.4.0"
+  }
+}
