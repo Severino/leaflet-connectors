@@ -32,7 +32,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Node Setup
-        uses: actions/setup-node@4
+        uses: actions/setup-node@3
         with:
           node-version: 18
       - run: npm ci
