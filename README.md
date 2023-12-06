@@ -17,12 +17,12 @@ Currently the following geometries are supported:
 
 Using yarn
 ```cmd
-yarn add leaflet-connector
+yarn add leaflet-outline-connector
 ```
 
 Using npm
 ```
-npm i leaflet-connector
+npm i leaflet-outline-connector
 ```
 
 ## Import into your environment
