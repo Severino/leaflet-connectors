@@ -2,6 +2,8 @@
 
 Leaflet connectors is a plugin to draw lines from the outlines of various geometries.
 
+Demo: [https://severino.github.io/leaflet-outline-connector/](https://severino.github.io/leaflet-outline-connector/)
+
 ## Supported Geometries
 
 Currently the following geometries are supported:
