@@ -1,25 +1,24 @@
 {
   "name": "leaflet-connectors",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "",
-  "main": "src/main.js",
+  "main": "leaflet-outline-connector.js",
   "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Severino/leaflet-connectors.git"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": ["leaflet", "connectors", "outline", "circle", "marker", "markers"],
+  "author": "Severin Opel",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/Severino/leaflet-connectors/issues"
   },
   "homepage": "https://github.com/Severino/leaflet-connectors#readme",
-  "dependencies": {
-    "leaflet": "^1.9.4"
+  "peerDependencies": {
+    "leaflet": "^1.0.0"
   },
   "devDependencies": {
     "leaflet-svg-shape-markers": "^1.4.0"

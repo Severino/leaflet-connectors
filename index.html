@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Connectors Demo</title>
+
+    <link rel="stylesheet" href="/node_modules/leaflet/dist/leaflet.css">
+
+    <style>
+        html,
+        body {
+            height: 100%;
+            margin: 0;
+        }
+
+        #map {
+            height: 100%;
+        }
+    </style>
+
+
+
+</head>
+
+<body>
+    <div id="map"></div>
+
+    <script src="./node_modules/leaflet/dist/leaflet.js"></script>
+    <script src="./node_modules/leaflet-svg-shape-markers/dist/leaflet-svg-shape-markers.min.js"></script>
+    <script src="./leaflet-outline-connector.js"></script>
+
+    <script type="module">
+        // import "./node_modules/leaflet/dist/leaflet-src.js";
+        // import './node_modules/leaflet-svg-shape-markers/dist/leaflet-svg-shape-markers.js';
+        // import './leaflet-outline-connector.js';
+
+        var map = L.map('map', {
+            center: [51.536086, 10.854492],
+            zoom: 6
+        });
+
+        map.on("click", function (e) {
+            if (e.originalEvent.ctrlKey) {
+                // Save latlng to clipboard
+                var latlng = e.latlng;
+                var lat = latlng.lat.toFixed(6);
+                var lng = latlng.lng.toFixed(6);
+                var latlngString = `[${lat}, ${lng}]`;
+                navigator.clipboard.writeText(latlngString);
+                console.log("Copied to clipboard: " + latlngString);
+            }
+        });
+
+        var Stadia_StamenWatercolor = L.tileLayer('https://tiles.stadiamaps.com/tiles/stamen_watercolor/{z}/{x}/{y}.{ext}', {
+            minZoom: 1,
+            maxZoom: 16,
+            attribution: '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://www.stamen.com/" target="_blank">Stamen Design</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            ext: 'jpg'
+        });
+
+        Stadia_StamenWatercolor.addTo(map);
+
+        // Single example
+
+        const Berlin_origin = L.shapeMarker([52.5170365, 13.3888599], { shape: "square", radius: 20, fill: false, color: "red" }).addTo(map);
+
+        const Stuttgart = L.circleMarker([48.7784485, 9.1800132]).addTo(map);
+        const Hamburg = L.circle([53.550341, 10.000654], { radius: 20000, fillOpacity: 0.3, color: "cyan" }).addTo(map);
+        const Munich = L.shapeMarker([48.1371079, 11.5753822], { shape: "square", radius: 10, fill: false, color: "green" }).addTo(map);
+
+        const destinations = [
+            Stuttgart,
+            Hamburg,
+            Munich,
+        ];
+
+        destinations.forEach((destination) => {
+            L.connector([Berlin_origin, destination], destination.options)
+                // The connector is a normal path object that must be added
+                // to the map separately from the markers.
+                .addTo(map)
+                // Optional to bring the connector to the back
+                // otherwise the line end is on top of the markers
+                // and it looks not so clean.
+                .bringToBack()
+        });
+
+
+        // Multiple example
+
+        const franceColor = "blue";
+
+        const Paris_origin = L.circle([48.788771, 2.323608], { radius: 30000, color: franceColor }).addTo(map);
+        const Reims = L.shapeMarker([49.2595, 4.02798], { shape: "square", radius: 10, fill: false, color: franceColor }).addTo(map);
+        const Rouen = L.circle([49.434347, 1.0943916], { radius: 10000, fill: false, color: franceColor }).addTo(map);
+        const LeMans = L.circleMarker([47.982456, 0.218905], { radius: 10, fill: false, color: franceColor }).addTo(map);
+
+        /**
+         * When connecting multiple geometries, the first 
+         * provided element is the origin and all connectors
+         * will be drawn from this element to the others.
+         */
+        L.connector([Paris_origin, Reims, Rouen, LeMans], { color: franceColor }).addTo(map);
+
+
+    </script>
+</body>
+
+</html>
