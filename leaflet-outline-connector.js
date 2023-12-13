@@ -37,18 +37,26 @@
 
         _createAnchors(...geom) {
             this._anchors = [];
+            // Cache all points
+            this._points = [];
             for (let i = 0; i < geom.length; i++) {
                 const type = this.checkGeometry(geom[i])
+
+                let geometry = geom[i]
+                if (type === 'point') {
+                    geometry = {
+                        _latlng: geometry,
+                        _point: null
+                    }
+                    this._points.push(geometry)
+                }
+
                 const anchor = {
                     isOrigin: i === 0,
                     type: type,
-                    geom: geom[i],
+                    geometry,
                     vector: null,
                     normalizedVector: null
-                }
-
-                if (i > 0) {
-                    this._calculateAnchorVector(anchor)
                 }
 
                 this._anchors.push(anchor)
@@ -57,6 +65,12 @@
 
         _getOriginAnchor() {
             return this._anchors[0]
+        },
+
+        _calculateAnchorVectors() {
+            for (let anchor of this._anchors) {
+                this._calculateAnchorVector(anchor)
+            }
         },
 
         _calculateAnchorVector(anchor) {
@@ -86,27 +100,30 @@
 
         _getCenter(anchor) {
             switch (anchor.type) {
+                case 'point': // fallthrough
                 case 'circle':  // fallthrough
                 case 'circle-marker': // fallthrough
-                case 'rect': return anchor.geom._point
+                case 'rect': return anchor.geometry._point
                 default: throw new Error('Unsupported geometry type')
             }
         },
 
         /**
          * Checks the type of geometry and returns the corresponding type.
-         * @param {L.Path} geom - The path-like object to check.
+         * @param {L.Path} geometry - The path-like object to check.
          * @returns {string} - The type of geometry (currently supported: 'rect', 'circle', 'circle-marker').
          * @throws {Error} - If the geometry type is not supported.
          */
-        checkGeometry(geom) {
+        checkGeometry(geometry) {
             let type = null
-            if (this._isShapeMarkerSquare(geom)) {
+            if (this._isShapeMarkerSquare(geometry)) {
                 type = 'rect'
-            } else if (geom instanceof L.Circle) {
+            } else if (geometry instanceof L.Circle) {
                 type = 'circle'
-            } else if (geom instanceof L.CircleMarker) {
+            } else if (geometry instanceof L.CircleMarker) {
                 type = 'circle-marker'
+            } else if (geometry instanceof L.LatLng || (Array.isArray(geometry) && geometry.length === 2)) {
+                type = 'point'
             } else {
                 throw new Error('Unsupported geometry type')
             }
@@ -117,8 +134,16 @@
             this._update();
         },
 
+        _projectPoints() {
+            this._points.forEach(point => {
+                point._point = this._map.latLngToLayerPoint(point._latlng)
+            })
+        },
+
         _update() {
             if (this._map) {
+                this._projectPoints();
+                this._calculateAnchorVectors();
                 this._updatePath();
             }
         },
@@ -142,7 +167,9 @@
 
         _getPointFromAnchor(anchor, other) {
             let point = null
-            if (anchor.type === 'circle') {
+            if (anchor.type === 'point') {
+                point = anchor.geometry._point
+            } else if (anchor.type === 'circle') {
                 point = this._getPointOnCircle(anchor)
             } else if (anchor.type === 'circle-marker') {
                 point = this._getPointOnCircleMarker(anchor)
@@ -157,12 +184,12 @@
 
         _getPointOnCircle(anchor) {
             let directionVector = anchor.normalizedVector
-            return anchor.geom._point.add(directionVector.multiplyBy(anchor.geom._radius))
+            return anchor.geometry._point.add(directionVector.multiplyBy(anchor.geometry._radius))
         },
 
         _getPointOnCircleMarker(anchor) {
             let directionVector = anchor.normalizedVector
-            return anchor.geom._point.add(directionVector.multiplyBy(anchor.geom.options.radius))
+            return anchor.geometry._point.add(directionVector.multiplyBy(anchor.geometry.options.radius))
         },
 
 
@@ -172,7 +199,7 @@
             const horizontal = new L.Point(1, 0)
             const vertical = new L.Point(0, 1)
 
-            const size = anchor.geom.options.radius
+            const size = anchor.geometry.options.radius
 
             let borders = [
                 { name: "Bottom", point: this._getCenter(anchor).add(vertical.multiplyBy(size)).subtract(horizontal.multiplyBy(size)), vector: horizontal },
@@ -235,12 +262,12 @@
             return { point: new L.Point(x, y), distance: anchorPoint.distanceTo(new L.Point(x, y)) }
         },
 
-        _isShapeMarker(geom) {
-            return geom instanceof L.ShapeMarker
+        _isShapeMarker(geometry) {
+            return geometry instanceof L.ShapeMarker
         },
 
-        _isShapeMarkerSquare(geom) {
-            return this._isShapeMarker(geom) && geom.options.shape === 'square'
+        _isShapeMarkerSquare(geometry) {
+            return this._isShapeMarker(geometry) && geometry.options.shape === 'square'
         }
     });
 

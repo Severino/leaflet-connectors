@@ -8,6 +8,9 @@ Demo: [https://severino.github.io/leaflet-outline-connector/](https://severino.g
 
 Currently the following geometries are supported:
 
++ Point 
+    + Array ([_lat_,_lng_])
+    + L.LatLng
 + CircleMarker
 + Circle
 + ShapeMarkers

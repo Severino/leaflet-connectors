@@ -60,49 +60,65 @@
 
         mapTiles.addTo(map);
 
-        // Single example
-
-        const Berlin_origin = L.shapeMarker([52.5170365, 13.3888599], { shape: "square", radius: 20, fill: false, color: "red" }).addTo(map);
-
-        const Stuttgart = L.circleMarker([48.7784485, 9.1800132]).addTo(map);
-        const Hamburg = L.circle([53.550341, 10.000654], { radius: 20000, fillOpacity: 0.3, color: "cyan" }).addTo(map);
-        const Munich = L.shapeMarker([48.1371079, 11.5753822], { shape: "square", radius: 10, fill: false, color: "green" }).addTo(map);
-
-        const destinations = [
-            Stuttgart,
-            Hamburg,
-            Munich,
-        ];
-
-        destinations.forEach((destination) => {
-            L.connector([Berlin_origin, destination], destination.options)
-                // The connector is a normal path object that must be added
-                // to the map separately from the markers.
-                .addTo(map)
-                // Optional to bring the connector to the back
-                // otherwise the line end is on top of the markers
-                // and it looks not so clean.
-                .bringToBack()
-        });
+        singleExample();
+        multipleExample();
+        pointExample();
 
 
-        // Multiple example
+        function singleExample() {
+            const Berlin_origin = L.shapeMarker([52.5170365, 13.3888599], { shape: "square", radius: 20, fill: false, color: "red" }).addTo(map);
 
-        const franceColor = "blue";
+            const Stuttgart = L.circleMarker([48.7784485, 9.1800132]).addTo(map);
+            const Hamburg = L.circle([53.550341, 10.000654], { radius: 20000, fillOpacity: 0.3, color: "cyan" }).addTo(map);
+            const Munich = L.shapeMarker([48.1371079, 11.5753822], { shape: "square", radius: 10, fill: false, color: "green" }).addTo(map);
 
-        const Paris_origin = L.circle([48.788771, 2.323608], { radius: 30000, color: franceColor }).addTo(map);
-        const Reims = L.shapeMarker([49.2595, 4.02798], { shape: "square", radius: 10, fill: false, color: franceColor }).addTo(map);
-        const Rouen = L.circle([49.434347, 1.0943916], { radius: 10000, fill: false, color: franceColor }).addTo(map);
-        const LeMans = L.circleMarker([47.982456, 0.218905], { radius: 10, fill: false, color: franceColor }).addTo(map);
+            const destinations = [
+                Stuttgart,
+                Hamburg,
+                Munich,
+            ];
 
-        /**
-         * When connecting multiple geometries, the first 
-         * provided element is the origin and all connectors
-         * will be drawn from this element to the others.
-         */
-        L.connector([Paris_origin, Reims, Rouen, LeMans], { color: franceColor }).addTo(map);
+            destinations.forEach((destination) => {
+                L.connector([Berlin_origin, destination], destination.options)
+                    // The connector is a normal path object that must be added
+                    // to the map separately from the markers.
+                    .addTo(map)
+                    // Optional to bring the connector to the back
+                    // otherwise the line end is on top of the markers
+                    // and it looks not so clean.
+                    .bringToBack()
+            });
+        }
 
 
+
+        function multipleExample() {
+
+            const franceColor = "blue";
+
+            const Paris_origin = L.circle([48.788771, 2.323608], { radius: 30000, color: franceColor }).addTo(map);
+            const Reims = L.shapeMarker([49.2595, 4.02798], { shape: "square", radius: 10, fill: false, color: franceColor }).addTo(map);
+            const Rouen = L.circle([49.434347, 1.0943916], { radius: 10000, fill: false, color: franceColor }).addTo(map);
+            const LeMans = L.circleMarker([47.982456, 0.218905], { radius: 10, fill: false, color: franceColor }).addTo(map);
+
+            /**
+             * When connecting multiple geometries, the first 
+             * provided element is the origin and all connectors
+             * will be drawn from this element to the others.
+             */
+            L.connector([Paris_origin, Reims, Rouen, LeMans], { color: franceColor }).addTo(map);
+        }
+
+        function pointExample() {
+
+            const borderPoint = L.latLng(46.522922, 13.714112);
+
+            const Rome = L.circle([41.887038, 12.490463], { radius: 25000, color: "red", fill: false }).addTo(map);
+            const Vienna = L.shapeMarker([48.203137, 16.360880], { shape: "square", radius: 10, fill: false, color: "red" }).addTo(map);
+            const Ljubljana = [46.053240, 14.508821];
+
+            L.connector([borderPoint, Rome, Vienna, Ljubljana], { color: "red" }).addTo(map);
+        }
     </script>
 </body>
 

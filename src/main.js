@@ -161,16 +161,8 @@ L.Connector = L.Path.extend({
 
         borders.forEach(({ name, point, vector } = {}) => {
             let { point: intersectionPoint, distance } = this._getIntersection(point, vector, size, other)
-
-            console.log(name, intersectionPoint, distance)
-
             if (distance < closest.distance) {
                 closest = { point: intersectionPoint, distance }
-            } else if (distance === closest.distance) {
-                // distance between centter and other anchor
-
-                console.log("SAME DISTANCE", distance, closest.distance, name)
-
             }
         })
 
