@@ -13,10 +13,30 @@
         body {
             height: 100%;
             margin: 0;
+            font-size: 12px;
+            font-family: 'Open Sans', 'Helvetica Neue', 'Helvetica', 'Arial', sans-serif;
         }
 
-        #map {
+        #canvas {
             height: 100%;
+        }
+
+        .info {
+            position: absolute;
+            bottom: 10px;
+            left: 10px;
+            width: 400px;
+            max-width: 100%;
+            min-height: 20px;
+            padding: 0px 15px;
+            background-color: white;
+            z-index: 10000;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            border-radius: 4px
+        }
+
+        .info:empty {
+            display: none;
         }
     </style>
 
@@ -25,58 +45,133 @@
 </head>
 
 <body>
-    <div id="map"></div>
+    <input type="hidden" id="clipboard">
+    <div class="info">
+        <p>Copy coordinates to clipboard</p>
+        <p><kbd>CTRL + Left Click</kbd> to copy the coordinates to the clipboard.</p>
+        <p><kbd>CTRL + SHIFT + Left Click</kbd> to append the coordinates to the existing clipboard.</p>
+    </div>
+    <div id="canvas"></div>
 
     <script src="./node_modules/leaflet/dist/leaflet.js"></script>
     <script src="./node_modules/leaflet-svg-shape-markers/dist/leaflet-svg-shape-markers.min.js"></script>
     <script src="./leaflet-outline-connector.js"></script>
 
     <script type="module">
+        //// You can also chose to import the files with the import statement when
+        //// being used in a module environment.
+        //
         // import "./node_modules/leaflet/dist/leaflet-src.js";
         // import './node_modules/leaflet-svg-shape-markers/dist/leaflet-svg-shape-markers.js';
         // import './leaflet-outline-connector.js';
 
-        var map = L.map('map', {
-            center: [51.536086, 10.854492],
-            zoom: 6
-        });
 
-        map.on("click", function (e) {
+        /**
+         * You may use the center and zoom as positional parameters in the URL.
+         * This may be great for debugging a single example without changing the
+         * code of the application.
+         */
+        const params = new URLSearchParams(window.location.search)
+        let center = [51.536086, 10.854492]
+        if (params.has("center")) {
+            center = params.get("center").split(",").map((coord) => parseFloat(coord))
+        }
+
+        let zoom = 6
+        if (params.has("zoom")) {
+            zoom = parseInt(params.get("zoom"))
+        }
+
+        var map = L.map("canvas", {
+            center,
+            zoom,
+        })
+
+        window.map = map
+
+
+        map.on("click", function(e) {
             if (e.originalEvent.ctrlKey) {
-                // Save latlng to clipboard
-                var latlng = e.latlng;
-                var lat = latlng.lat.toFixed(6);
-                var lng = latlng.lng.toFixed(6);
-                var latlngString = `[${lat}, ${lng}]`;
-                navigator.clipboard.writeText(latlngString);
-                console.log("Copied to clipboard: " + latlngString);
+
+                let append = e.originalEvent.shiftKey
+                navigator.clipboard.readText().then(
+                    clipText => {
+                        let coordinates = []
+                        if (append) {
+                            coordinates = clipText.split(",\n")
+                        }
+                        
+                        // Save latlng to clipboard
+                        var latlng = e.latlng
+                        var lat = latlng.lat.toFixed(6)
+                        var lng = latlng.lng.toFixed(6)
+                        var latlngString = `[${lat}, ${lng}]`
+                        coordinates.push(latlngString)
+
+                        let text
+                        if (coordinates.length > 1) {
+                            text = coordinates.join(",\n")
+                        } else {
+                            text = coordinates[0]
+                        }
+
+                        navigator.clipboard.writeText(text)
+                        /* eslint-disable-next-line no-console */
+                        console.log("Copied to clipboard: " + text)
+                    })
+
+
             }
-        });
+        })
 
-        var mapTiles = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-            attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
-            maxZoom: 16
-        });
+        var mapTiles = L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+            attribution: "Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ",
+            maxZoom: 16,
+        })
 
-        mapTiles.addTo(map);
+        mapTiles.addTo(map)
 
-        singleExample();
-        multipleExample();
-        pointExample();
+
+        /**
+         *  Examples
+         */
+
+        const examples = {
+            "single": singleExample,
+            "multiple": multipleExample,
+            "point": pointExample,
+            "inside-outside": insideBigCircle,
+        }
+
+        let showAll = true
+        if (params.has("example")) {
+            const example = params.get("example")
+            if (examples[example] !== undefined) {
+                showAll = false
+                examples[example]()
+            }
+        }
+
+        if (showAll) {
+            Object.values(examples).forEach((example) => {
+                example()
+            })
+        }
+
 
 
         function singleExample() {
-            const Berlin_origin = L.shapeMarker([52.5170365, 13.3888599], { shape: "square", radius: 20, fill: false, color: "red" }).addTo(map);
+            const Berlin_origin = L.shapeMarker([52.5170365, 13.3888599], { shape: "square", radius: 20, fill: false, color: "red" }).addTo(map)
 
-            const Stuttgart = L.circleMarker([48.7784485, 9.1800132]).addTo(map);
-            const Hamburg = L.circle([53.550341, 10.000654], { radius: 20000, fillOpacity: 0.3, color: "cyan" }).addTo(map);
-            const Munich = L.shapeMarker([48.1371079, 11.5753822], { shape: "square", radius: 10, fill: false, color: "green" }).addTo(map);
+            const Stuttgart = L.circleMarker([48.7784485, 9.1800132]).addTo(map)
+            const Hamburg = L.circle([53.550341, 10.000654], { radius: 20000, fillOpacity: 0.3, color: "cyan" }).addTo(map)
+            const Munich = L.shapeMarker([48.1371079, 11.5753822], { shape: "square", radius: 10, fill: false, color: "green" }).addTo(map)
 
             const destinations = [
                 Stuttgart,
                 Hamburg,
                 Munich,
-            ];
+            ]
 
             destinations.forEach((destination) => {
                 L.connector([Berlin_origin, destination], destination.options)
@@ -87,37 +182,99 @@
                     // otherwise the line end is on top of the markers
                     // and it looks not so clean.
                     .bringToBack()
-            });
+            })
         }
 
 
 
         function multipleExample() {
 
-            const franceColor = "blue";
+            const franceColor = "blue"
 
-            const Paris_origin = L.circle([48.788771, 2.323608], { radius: 30000, color: franceColor }).addTo(map);
-            const Reims = L.shapeMarker([49.2595, 4.02798], { shape: "square", radius: 10, fill: false, color: franceColor }).addTo(map);
-            const Rouen = L.circle([49.434347, 1.0943916], { radius: 10000, fill: false, color: franceColor }).addTo(map);
-            const LeMans = L.circleMarker([47.982456, 0.218905], { radius: 10, fill: false, color: franceColor }).addTo(map);
+            const Paris_origin = L.circle([48.788771, 2.323608], { radius: 30000, color: franceColor }).addTo(map)
+            const Reims = L.shapeMarker([49.2595, 4.02798], { shape: "square", radius: 10, fill: false, color: franceColor }).addTo(map)
+            const Rouen = L.circle([49.434347, 1.0943916], { radius: 10000, fill: false, color: franceColor }).addTo(map)
+            const LeMans = L.circleMarker([47.982456, 0.218905], { radius: 10, fill: false, color: franceColor }).addTo(map)
 
             /**
              * When connecting multiple geometries, the first 
              * provided element is the origin and all connectors
              * will be drawn from this element to the others.
              */
-            L.connector([Paris_origin, Reims, Rouen, LeMans], { color: franceColor }).addTo(map);
+            L.connector([Paris_origin, Reims, Rouen, LeMans], { color: franceColor }).addTo(map)
         }
 
         function pointExample() {
 
-            const borderPoint = L.latLng(46.522922, 13.714112);
+            const borderPoint = L.latLng(46.522922, 13.714112)
 
-            const Rome = L.circle([41.887038, 12.490463], { radius: 25000, color: "red", fill: false }).addTo(map);
-            const Vienna = L.shapeMarker([48.203137, 16.360880], { shape: "square", radius: 10, fill: false, color: "red" }).addTo(map);
-            const Ljubljana = [46.053240, 14.508821];
+            const Rome = L.circle([41.887038, 12.490463], { radius: 25000, color: "red", fill: false }).addTo(map)
+            const Vienna = L.shapeMarker([48.203137, 16.360880], { shape: "square", radius: 10, fill: false, color: "red" }).addTo(map)
+            const Ljubljana = [46.053240, 14.508821]
 
-            L.connector([borderPoint, Rome, Vienna, Ljubljana], { color: "red" }).addTo(map);
+            L.connector([borderPoint, Rome, Vienna, Ljubljana], { color: "red" }).addTo(map)
+
+        }
+
+        function insideBigCircle() {
+            const bigCircle = L.circle([52.200874, 18.808594], { radius: 200000, color: "green", fill: false }).addTo(map)
+
+            const insidePoints = [
+                [52.234528, 17.127686],
+                [52.981723, 17.709961],
+                [53.212612, 18.863525],
+                [53.014783, 19.896240],
+                [52.382306, 20.313721],
+                [51.761040, 20.181885],
+                [51.241286, 19.291992],
+                [51.536086, 17.731934],
+            ]
+
+            const outsidePoints = [
+                [53.278353, 15.688477],
+                [54.098060, 17.336426],
+                [54.380557, 18.808594],
+                [54.136696, 20.478516],
+                [53.904338, 21.357422],
+                [52.476089, 22.675781],
+                [51.835778, 22.807617],
+                [51.399206, 22.609863],
+                [50.569283, 21.621094],
+                [49.894634, 20.939941],
+                [49.539469, 19.643555],
+                [49.567978, 18.588867],
+                [50.064192, 17.050781],
+                [50.805935, 15.578613],
+                [52.268157, 15.073242],
+            ]
+
+
+            const square = function(latLng) {
+                return L.shapeMarker(latLng, { shape: "square", radius: 10, color: "green", fill: false })
+            }
+
+            const circleMarker = function(latLng) {
+                return L.circleMarker(latLng, { radius: 10, color: "green", fill: false })
+            }
+
+            const circle = function(latLng) {
+                return L.circle(latLng, { radius: 20000, color: "green", fill: false })
+            }
+
+            const shapes = { square, circleMarker, circle }
+            let shape = circle
+            if (params.has("shape")) {
+                const urlShape = params.get("shape")
+                if (shapes[urlShape] !== undefined) {
+                    shape = shapes[urlShape]
+                }
+            }
+
+            ([...insidePoints, ...outsidePoints]).forEach((latLng) => {
+                let pointGeometry = shape(latLng).addTo(map)
+                L.connector([bigCircle, pointGeometry], { color: "green" }).addTo(map)
+            })
+
         }
     </script>
 </body>

@@ -2,7 +2,9 @@
 
 Leaflet connectors is a plugin to draw lines from the outlines of various geometries.
 
-Demo: [https://severino.github.io/leaflet-outline-connector/](https://severino.github.io/leaflet-outline-connector/)
+Live-Demo: [https://severino.github.io/leaflet-outline-connector/](https://severino.github.io/leaflet-outline-connector/)
+
+**Checkout the [Demo](#demo) section for more infos how to use the Demo effectively.**
 
 ## Supported Geometries
 
@@ -108,3 +110,29 @@ You may also provide as many elements as you want, whereas the first element is 
         L.connector([Paris_origin, Reims, Rouen, LeMans], { color: franceColor }).addTo(map);
 ```
 
+<h2 id="demo">Demo</h2>
+
+The demo provides a good insight on the capabilities of the plugin and also
+a proper playground when developing. 
+
+### Parameters
+
+The behavior of the app may be altered utilizing the query string of the URL.
+Following parameters and values are available:
+
+| name | values | example | description | 
+| --- | --- | --- | --- |
+| center | _lat_[float]**,**_lng_[float] | ?center=52.241256,18.720703 | Sets the viewport position on the map to the coodinates specified. |
+| zoom | _zoom-level_[int] | ?zoom=7 | Sets the viewport zoom on the map to the specified zoom level |
+| example | _example-name_["single" \| "multiple" \| "point" \| "inside-outside"] | ?example=single | Specifies which example should be loaded in isolation. By default all examples are loaded |
+| shape | _shape-name_[circle \| circleMarker \| square] | ?shape=square | Sets a target shape. **Only works for the example 'inside-out'**
+
+**Note: If you are not familiar with query parameters, they are put at the end of the URL. The start is indicated by a '?' followed by a key value pair separated by an '='. Additional parameters can be added by separating them with an '&'.
+Example: https://localhost/index.html?zoom=7&center=52.241,18.720**
+
+### Hotkeys
+
+For ease of use the app also provides a small set an hotkeys which make the live a bit easier.
+
++ [CTRL + Left Click] Copy coordinate of mouse cursor to clipboard
++ [CTRL + SHIFT + Left Click] Appends the mouse cursor coordinate to the exixting clipboard
